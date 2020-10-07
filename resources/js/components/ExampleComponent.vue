@@ -52,9 +52,12 @@
                                 </div>
                                 <div v-bind:class="{hidden: isnotQRcode}" class="camera-layer2 text-center">
                                     <div class="form-group m-form__group">
-                                        <input :disabled="isDisabled == 1" v-model="id_number" type="text" class="form-control m-input" id="id_number" name="id_number" placeholder="Enter id number here">
+                                        <input :disabled="isDisabled == 1" v-model="id_number" @keyup="searchMethod" type="text" class="form-control m-input" id="id_number" name="id_number" placeholder="enter id number">
                                     </div>
-                                    <button :disabled="isDisabled == 1" @click="requestOTP" id="request-otp-btn" ref="request-otp-btn" type="button" class="btn btn-md">
+                                    <div class="form-group m-form__group">
+                                        <input :disabled="isDisabled == 1" v-bind:class="{hidden: isHidden}" v-model="mobile_number" type="text" class="form-control m-input" id="mobile_number" name="mobile_number" placeholder="enter mobile number">
+                                    </div>
+                                    <button :disabled="isDisabled == 1 || (isSearch == false && mobile_number == '')" @click="requestOTP" id="request-otp-btn" ref="request-otp-btn" type="button" class="btn btn-md">
                                         request an OTP
                                     </button>
                                     <div>
@@ -107,6 +110,7 @@
             return {
                 subject: 'select a subject',
                 options: [],
+                mobile_number: '',
                 id_number: '',
                 otp_1: '',
                 otp_2: '',
@@ -121,6 +125,8 @@
                 isSuccess: false,
                 isActive: false,
                 isActive2: false,
+                isSearch: false,
+                isHidden: true,
                 isDisabled: 0,
                 firstname: '',
                 lastname: '',
@@ -278,7 +284,10 @@
             resetModal() {
                 this.isActive = false
                 this.isActive2 = false
+                this.isSearch = false
+                this.isHidden = true
                 this.action = ''
+                this.mobile_number = ''
                 this.id_number = ''
                 this.otp_1 = ''
                 this.otp_2 = ''
@@ -290,17 +299,46 @@
                 this.subject = 'select a subject'
             },
 
+            searchMethod() {
+                let self = this
+                if (this.id_number !== '') { 
+                    console.log(base_url + 'search?id_number='+ self.id_number)
+                    axios.get(base_url + 'search?id_number='+ self.id_number)
+                    .then(function (response) {
+                        // handle success
+                        var res = response  
+                        console.log(response)
+                        if (res.data.search == true) {
+                            self.isSearch = true
+                            self.isHidden = true
+                        } else {
+                            self.isSearch = false
+                            self.isHidden = false
+                        }
+                    })
+                    .catch(function (error) {
+                        // handle error
+                        console.log(error);
+                        self.$refs['audio2'].play()
+                    })
+                    .then(function () {
+                        // always executed
+                    });
+                }
+            },
+
             requestOTP() {
                 let self = this
                 if (this.id_number !== '') { 
-                    console.log(base_url + 'request-otp?id_number='+ self.id_number)
-                    axios.get(base_url + 'request-otp?id_number='+ self.id_number)
+                    console.log(base_url + 'request-otp?id_number='+ self.id_number + '&mobile_number=' + self.mobile_number)
+                    axios.get(base_url + 'request-otp?id_number='+ self.id_number + '&mobile_number=' + self.mobile_number)
                     .then(function (response) {
                         // handle success
                         var res = response  
                         console.log(response)
                         if (res.data.type == 'success') {
                             self.isDisabled = 1
+                            self.isHidden = true
                         } else {
                             self.isDisabled = 0
                             self.$refs['audio2'].play()
