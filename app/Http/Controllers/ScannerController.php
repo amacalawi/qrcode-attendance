@@ -14,6 +14,7 @@ use App\CalendarSection;
 use App\CalendarTimeSetting;
 use App\OtpRequest;
 use App\Subject;
+use App\StudentMobileNumber;
 Use DB; 
 
 class ScannerController extends Controller
@@ -393,6 +394,27 @@ class ScannerController extends Controller
         ->get();
 
         if ($member->count() > 0) {
+            if (!empty($request->get('mobile_number'))) {
+                $studMobile = StudentMobileNumber::where([
+                    'member_id' => $member->first()->id,
+                    'is_active' => 1
+                ])->get();
+
+                if ($studMobile->count() > 0) {
+                    $studMobileData = StudentMobileNumber::where('id', $studMobile->first()->id)
+                        ->update([
+                            'mobile_no' => $request->get('mobile_number'),
+                            'updated_at' => $timestamp
+                        ]);
+                } else {
+                    $studMobileData = StudentMobileNumber::create([
+                        'member_id' => $member->first()->id,
+                        'mobile_no' => $request->get('mobile_number'),
+                        'created_at' => $timestamp
+                    ]);
+                }
+            }
+
             $random = mt_rand(10000, 50000);
 
             $otp_request = OtpRequest::create([
@@ -664,5 +686,42 @@ class ScannerController extends Controller
         }
 
         return $subjects;
+    }
+
+    public function search(Request $request)
+    {   
+        $school_year  = Schoolyear::where('status', 'CURRENT')->first()->id;
+
+        $res = Member::select('members.id', 'student_mobile_numbers.mobile_no')
+        ->join('enrollments', function($join)
+        {   
+            $join->on('members.id', '=', 'enrollments.member_id');
+        })
+        ->join('student_mobile_numbers', function($join)
+        {   
+            $join->on('members.id', '=', 'student_mobile_numbers.member_id');
+        })
+        ->where([
+            'enrollments.schoolyear_id' => $school_year,
+            'members.stud_no' => $request->get('id_number')
+        ])->get();
+
+        if ($res->count() > 0) {
+            $data = array(
+                'data' => $res,
+                'message' => 'the user was search successfully.',
+                'search' => true
+            );
+
+            echo json_encode( $data ); exit();  
+        } else {
+            $data = array(
+                'data' => $res,
+                'message' => 'the user was not search successfully.',
+                'search' => false
+            );
+
+            echo json_encode( $data ); exit();
+        }
     }
 }
