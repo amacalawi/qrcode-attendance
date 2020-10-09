@@ -89,8 +89,11 @@
 
         <b-modal ref="my-modal" @hidden="resetModal" centered hide-footer title="QR Cam">
             <div class="video-layer">
-                <qrcode-stream @decode="onDecode" @init="onInit" />
+                <qrcode-stream :camera="camera" @decode="onDecode" @init="onInit" />
             </div>
+            <button @click="switchCamera" class="btn btn-camera" alt="switch camera">
+                <i class="fa fa-camera"></i> Switch Camera
+            </button>
         </b-modal>
     </section>
   
@@ -136,7 +139,11 @@
                 image: '',
                 mp3Source1: base_url + 'audio/access_granted.mp3',
                 mp3Source2: base_url + 'audio/try_again.mp3',
-                imgSource: base_url + 'images/1824.jpg'
+                imgSource: base_url + 'images/1824.jpg',
+                camera: 'auto',
+                noRearCamera: false,
+                noFrontCamera: false,
+                switchcamera: base_url + 'images/switch-camera-icon.jpg'
             }
         },
 
@@ -404,23 +411,35 @@
                 });
             },
 
+            switchCamera () {
+                switch (this.camera) {
+                    case 'front':
+                        this.camera = 'auto'
+                        break
+                    case 'auto':
+                        this.camera = 'front'
+                        break
+                }
+            },
+
             async onInit (promise) {
                 try {
                     await promise
                 } catch (error) {
-                    if (error.name === 'NotAllowedError') {
-                        this.error = "ERROR: you need to grant camera access permisson"
-                    } else if (error.name === 'NotFoundError') {
-                        this.error = "ERROR: no camera on this device"
-                    } else if (error.name === 'NotSupportedError') {
-                        this.error = "ERROR: secure context required (HTTPS, localhost)"
-                    } else if (error.name === 'NotReadableError') {
-                        this.error = "ERROR: is the camera already in use?"
-                    } else if (error.name === 'OverconstrainedError') {
-                        this.error = "ERROR: installed cameras are not suitable"
-                    } else if (error.name === 'StreamApiNotSupportedError') {
-                        this.error = "ERROR: Stream API is not supported in this browser"
+                    const triedFrontCamera = this.camera === 'front'
+                    const triedRearCamera = this.camera === 'rear'
+
+                    const cameraMissingError = error.name === 'OverconstrainedError'
+
+                    if (triedRearCamera && cameraMissingError) {
+                        this.noRearCamera = true
                     }
+
+                    if (triedFrontCamera && cameraMissingError) {
+                        this.noFrontCamera = true
+                    }
+
+                    console.error(error)
                 }
             }
         },

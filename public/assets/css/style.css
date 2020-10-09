@@ -316,3 +316,11 @@ video {
 .swal2-popup .swal2-styled:focus {
     box-shadow: none !important;
 }
+
+.modal-body {
+    text-align: center;
+}
+
+.btn-camera {
+    margin-top: 15px;
+}
