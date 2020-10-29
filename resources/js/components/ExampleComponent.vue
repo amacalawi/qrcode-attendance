@@ -202,9 +202,9 @@
                                     })
                                     self.actions = res.data.action
                                     self.isActive = !self.isActive
-                                    setTimeout(function(){ 
-                                        location.replace("http://dioceseofantipolo.net/e/position/nsdaps/4");
-                                    }, 4000);
+                                    //setTimeout(function(){ 
+                                    //    location.replace("http://dioceseofantipolo.net/e/position/nsdaps/4");
+                                    //}, 4000);
                                 } else {
                                     self.$refs['audio2'].play()
                                 }
@@ -264,9 +264,9 @@
                                     })
                                     self.actions = res.data.action
                                     self.isActive = !self.isActive
-                                    setTimeout(function(){ 
-                                        location.replace("http://dioceseofantipolo.net/e/position/nsdaps/4");
-                                    }, 4000);
+                                    //setTimeout(function(){ 
+                                    //    location.replace("http://dioceseofantipolo.net/e/position/nsdaps/4");
+                                    //}, 4000);
                                 } else {
                                     self.$refs['audio2'].play()
                                 }
@@ -391,9 +391,9 @@
                             }
                         })
                         self.actions = res.data.action
-                        setTimeout(function(){ 
-                            location.replace("http://dioceseofantipolo.net/e/position/nsdaps/4");
-                        }, 4000);
+                        //setTimeout(function(){ 
+                        //    location.replace("http://dioceseofantipolo.net/e/position/nsdaps/4");
+                        //}, 4000);
                     } else {
                         self.$refs['audio2'].play()
                     }
